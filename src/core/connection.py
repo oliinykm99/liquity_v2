@@ -1,7 +1,4 @@
 from web3 import Web3
-import os
-
-URL = os.getenv("HTTPS_URL")
 
 class EthereumConnection:
     def __init__(self, URL):
