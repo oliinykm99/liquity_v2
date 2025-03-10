@@ -177,4 +177,5 @@ airflow/airflow-scheduler.err
 airflow/airflow-scheduler.log
 airflow/airflow-scheduler.out
 airflow/airflow-scheduler.pid
+airflow/airflow-webserver.pid
 airflow/airflow.db
