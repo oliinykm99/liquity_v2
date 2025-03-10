@@ -172,8 +172,9 @@ cython_debug/
 
 # Ignore Airflow scheduler logs and related files
 logs/scheduler/
-airflow/logs/airflow-scheduler.err
-airflow/logs/airflow-scheduler.log
-airflow/logs/airflow-scheduler.out
-airflow/logs/airflow-scheduler.pid
-airflow/logs/airflow.db
+airflow/logs
+airflow/airflow-scheduler.err
+airflow/airflow-scheduler.log
+airflow/airflow-scheduler.out
+airflow/airflow-scheduler.pid
+airflow/airflow.db
