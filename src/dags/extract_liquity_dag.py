@@ -5,7 +5,9 @@ from src.core.tasks.connect import connect_to_ethereum
 from src.core.tasks.extract import (fetch_stabilityTVL, fetch_activeDEBT,
                                     fetch_activeTVL, fetch_price)
 from src.core.tasks.clean import (clean_stabilityTVL, clean_prices,
-                                  clean_activeDEBT)
+                                  clean_activeDEBT, clean_activeTVL,
+                                  clean_activeTVL_USD)
+from src.core.tasks.aggregate import aggregate_pools
 
 default_args = {
     "owner": "admin",
@@ -68,9 +70,30 @@ clean_activeDEBT_task = PythonOperator(
     dag=dag,
 )
 
+clean_activeTVL_task = PythonOperator(
+    task_id = 'clean_activeTVL_task',
+    python_callable=clean_activeTVL,
+    dag=dag
+)
+
+clean_activeTVL_USD_task = PythonOperator(
+    task_id = 'clean_activeTVL_USD_task',
+    python_callable=clean_activeTVL_USD,
+    dag=dag,
+)
+
+aggregate_pools_task = PythonOperator(
+    task_id = 'aggregate_pools_task',
+    python_callable=aggregate_pools,
+    dag=dag,
+)
+
 
 
 connect_to_ethereum_task >> [fetch_activeDEBT_task, fetch_ActiveTVL_task, fetch_stabilityTVL_task, fetch_price_task]
 fetch_stabilityTVL_task >> clean_stabilityTVL_task
 fetch_price_task >> clean_prices_task
 fetch_activeDEBT_task >> clean_activeDEBT_task
+fetch_ActiveTVL_task >> clean_activeTVL_task
+[clean_activeTVL_task, clean_prices_task] >> clean_activeTVL_USD_task
+[clean_activeTVL_task, clean_activeTVL_USD_task, clean_activeDEBT_task, clean_stabilityTVL_task, clean_prices_task] >> aggregate_pools_task
