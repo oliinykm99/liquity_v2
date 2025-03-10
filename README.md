@@ -10,7 +10,7 @@ The current DAG performs the following tasks:
 - Aggregates the data by active pools into a nested dictionary structure.
 
 Below is a screenshot of the current DAG:
-![Current DAG](dag.png)
+![Current DAG](images/dag.png)
 
 ## Future Work
 
