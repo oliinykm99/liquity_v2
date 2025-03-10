@@ -1,5 +1,0 @@
-[2025-03-03 09:45:13 -0500] [9762] [INFO] Starting gunicorn 23.0.0
-[2025-03-03 09:45:13 -0500] [9762] [INFO] Listening at: http://[::]:8793 (9762)
-[2025-03-03 09:45:13 -0500] [9762] [INFO] Using worker: sync
-[2025-03-03 09:45:13 -0500] [9766] [INFO] Booting worker with pid: 9766
-[2025-03-03 09:45:13 -0500] [9769] [INFO] Booting worker with pid: 9769
