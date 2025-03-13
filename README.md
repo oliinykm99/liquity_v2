@@ -12,6 +12,8 @@ The current DAG performs the following tasks:
 Below is a screenshot of the current DAG:
 ![Current DAG](images/dag.png)
 
+Below is a screenshot of the current Database:
+![Current Database](images/db.png)
 ## Future Work
 
 I plan to add a new DAG for fetching troves distribution. This DAG will:
