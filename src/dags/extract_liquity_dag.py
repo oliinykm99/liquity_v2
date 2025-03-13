@@ -8,6 +8,7 @@ from src.core.tasks.clean import (clean_stabilityTVL, clean_prices,
                                   clean_activeDEBT, clean_activeTVL,
                                   clean_activeTVL_USD)
 from src.core.tasks.aggregate import aggregate_pools
+from src.core.tasks.load import load
 
 default_args = {
     "owner": "admin",
@@ -88,6 +89,12 @@ aggregate_pools_task = PythonOperator(
     dag=dag,
 )
 
+load_data_task = PythonOperator(
+    task_id = 'load_data_task',
+    python_callable=load,
+    dag=dag
+)
+
 
 
 connect_to_ethereum_task >> [fetch_activeDEBT_task, fetch_ActiveTVL_task, fetch_stabilityTVL_task, fetch_price_task]
@@ -97,3 +104,4 @@ fetch_activeDEBT_task >> clean_activeDEBT_task
 fetch_ActiveTVL_task >> clean_activeTVL_task
 [clean_activeTVL_task, clean_prices_task] >> clean_activeTVL_USD_task
 [clean_activeTVL_task, clean_activeTVL_USD_task, clean_activeDEBT_task, clean_stabilityTVL_task, clean_prices_task] >> aggregate_pools_task
+aggregate_pools_task >> load_data_task
