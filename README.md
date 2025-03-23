@@ -16,15 +16,18 @@ We now have two DAGs performing the following tasks:
    - Cleans the fetched data.
    - Aggregates the data by trove manager into a nested dictionary structure with trove IDs, owner addresses, and relevant variables of a trove.
 
-
+### General
 Below is a screenshot of the current DAG for Liquity V2:
 ![Current DAG](images/dag_general.png)
 
+Below is a screenshot of the current table for Liquity V2:
+![Current Database](images/db_general.png)
+
+### Troves
 Below is a screenshot of the current DAG for Liquity V2 Troves:
 ![Current DAG Troves](images/dag_troves.png)
 
-Below is a screenshot of the current table for Liquity V2 (General):
-![Current Database](images/db_general.png)
+
 ## Future Work
 
 We plan to extend the pipeline with the following enhancements:
