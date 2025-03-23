@@ -20,13 +20,14 @@ class DBManager:
     def create_table(self):
         query = """
         CREATE TABLE IF NOT EXISTS LiquityV2 (
-            active_pool TEXT PRIMARY KEY,
+            active_pool TEXT,
             TVL NUMERIC,
             TVL_USD NUMERIC,
             debt NUMERIC,
             stabilityTVL NUMERIC,
             price NUMERIC,
-            timestamp TIMESTAMPTZ DEFAULT NOW()
+            timestamp TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY (active_pool, timestamp)  -- Ensures one entry per active_pool per timestamp
         );
         """
         self.cursor.execute(query)
@@ -34,15 +35,10 @@ class DBManager:
 
     def store_liquity_data(self, data):
         query = """
-        INSERT INTO LiquityV2 (active_pool, TVL, TVL_USD, debt, stabilityTVL, price)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ON CONFLICT (active_pool) DO UPDATE SET
-        TVL = EXCLUDED.TVL,
-        TVL_USD = EXCLUDED.TVL_USD,
-        debt = EXCLUDED.debt,
-        stabilityTVL = EXCLUDED.stabilityTVL,
-        price = EXCLUDED.price;
+        INSERT INTO LiquityV2 (active_pool, TVL, TVL_USD, debt, stabilityTVL, price, timestamp)
+        VALUES (%s, %s, %s, %s, %s, %s, NOW());
         """
+        
         for active_pool, values in data.items():
             self.cursor.execute(
                 query,
