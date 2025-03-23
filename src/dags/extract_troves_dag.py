@@ -6,7 +6,8 @@ from src.core.tasks.connect import connect_to_ethereum
 from src.core.tasks.extract import (fetch_troveSizes, fetch_troveIDs, fetch_troveOwner, 
                                     fetch_price, fetch_troveCR, fetch_troveData,
                                     extract_requiredTroveData)
-from src.core.tasks.clean import (clean_troveCR)
+from src.core.tasks.clean import (clean_troveCR, clean_troveRequiredData)
+from src.core.tasks.aggregate import aggregate_troves
 
 default_args = {
     "owner": "admin",
@@ -76,9 +77,22 @@ clean_troveCR_task = PythonOperator(
     dag=dag,
 )
 
+clean_troveRequiredData_task = PythonOperator(
+    task_id = "clean_troveRequiredData_task",
+    python_callable=clean_troveRequiredData,
+    dag=dag,
+)
+
+aggregate_troves_task = PythonOperator(
+    task_id = "aggregate_troves_task",
+    python_callable=aggregate_troves,
+    dag=dag,
+)
+
 
 connect_to_ethereum_task >> fetch_troveSizes_task >> fetch_troveIDs_task
 connect_to_ethereum_task >> fetch_price_task
 fetch_troveIDs_task >> fetch_troveOwner_task
 [fetch_price_task, fetch_troveIDs_task] >> fetch_troveCR_task >> clean_troveCR_task
-fetch_troveIDs_task >> fetch_troveData_task >> extract_requiredTroveData_task
+fetch_troveIDs_task >> fetch_troveData_task >> extract_requiredTroveData_task >> clean_troveRequiredData_task
+[fetch_troveOwner_task, clean_troveCR_task, clean_troveRequiredData_task] >> aggregate_troves_task
