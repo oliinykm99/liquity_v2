@@ -9,14 +9,22 @@ The current DAG performs the following tasks:
 - Cleans the fetched data.
 - Aggregates the data by active pools into a nested dictionary structure.
 
-Below is a screenshot of the current DAG:
-![Current DAG](images/dag.png)
+Below is a screenshot of the current DAG for Liquity V2:
+![Current DAG](images/dag_general.png)
 
-Below is a screenshot of the current Database:
-![Current Database](images/db.png)
+Below is a screenshot of the current DAG for Liquity V2 Troves:
+![Current DAG Troves](images/dag_troves.png)
+
+Below is a screenshot of the current table for Liquity V2 (General):
+![Current Database](images/db_general.png)
 ## Future Work
 
-I plan to add a new DAG for fetching troves distribution. This DAG will:
-- Fetch data related to troves (e.g., collateral ratios, debt amounts).
-- Clean and process the troves data.
-- Integrate the troves data with the existing pipeline.
+We plan to extend the pipeline with the following enhancements:
+- **Troves DAG:**
+  - Upload troves data to a cloud data warehouse for efficient storage and analysis.
+- **Data Validation and Quality:**
+  - Introduce validation checks to ensure data integrity.
+  - Implement data quality monitoring for both DAGs.
+- **Optimization:**
+  - Improve the performance of existing DAGs by optimizing queries and task execution.
+  - Refactor code for better scalability and maintainability.
