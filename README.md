@@ -2,12 +2,20 @@
 
 This repository contains an Apache Airflow DAG for fetching, cleaning, and aggregating data related to Liquity V2 active pools, stability pools, and collateral prices.
 
-## Current DAG
+## Current DAGs
 
-The current DAG performs the following tasks:
-- Fetches data for active pools, stability pools, and price feeds.
-- Cleans the fetched data.
-- Aggregates the data by active pools into a nested dictionary structure.
+We now have two DAGs performing the following tasks:
+
+1. **Active Pools DAG:**
+   - Fetches data for active pools, stability pools, and price feeds.
+   - Cleans the fetched data.
+   - Aggregates the data by active pools into a nested dictionary structure.
+
+2. **Troves DAG:**
+   - Fetches data from trove managers, sorted troves, trove NFT, and price feeds.
+   - Cleans the fetched data.
+   - Aggregates the data by trove manager into a nested dictionary structure with trove IDs, owner addresses, and relevant variables of a trove.
+
 
 Below is a screenshot of the current DAG for Liquity V2:
 ![Current DAG](images/dag_general.png)
