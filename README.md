@@ -27,6 +27,9 @@ Below is a screenshot of the current table for Liquity V2:
 Below is a screenshot of the current DAG for Liquity V2 Troves:
 ![Current DAG Troves](images/dag_troves.png)
 
+Below is a screenshot of the current table for Liquity V2 Troves:
+![Current Database Trove](images/db_troves.png)
+
 
 ## Future Work
 
