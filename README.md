@@ -30,12 +30,12 @@ Below is a screenshot of the current DAG for Liquity V2 Troves:
 Below is a screenshot of the current table for Liquity V2 Troves:
 ![Current Database Trove](images/db_troves.png)
 
+Below is a screenshot showing the trove_manager and number of troves, which you can compare with the Liquity V2 explorer at https://liquityv2.defiexplore.com/.
+![Total Troves](images/total_troves.png)
 
 ## Future Work
 
 We plan to extend the pipeline with the following enhancements:
-- **Troves DAG:**
-  - Upload troves data to a cloud data warehouse for efficient storage and analysis.
 - **Data Validation and Quality:**
   - Introduce validation checks to ensure data integrity.
   - Implement data quality monitoring for both DAGs.
