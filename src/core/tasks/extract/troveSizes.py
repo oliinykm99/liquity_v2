@@ -1,3 +1,4 @@
+from airflow.exceptions import AirflowException
 from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import sortedTrove
 from config import sortedTroves
@@ -14,5 +15,5 @@ def fetch_troveSizes(**kwargs):
             value = pool_contract.functions.getSize().call()
             results[pool] = value
         except Exception as e:
-            print(f"Error fetching trove sizes for {pool}: {e}")
+            raise AirflowException(f"Error fetching trove sizes for {pool}: {e}")
     return results

@@ -21,11 +21,11 @@ def fetch_troveData(**kwargs):
                     results[pool][id] = troveData
                 except Exception as e:
                     missing_troves.append((pool, id))
-                    print(f"Error fetching data for pool {pool}, trove {id}: {e}")
+                    raise AirflowException(f"Error fetching data for pool {pool}, trove {id}: {e}")
 
         except Exception as e:
             missing_troves.extend([(pool, id) for id in ids])
-            print(f"Error processing pool {pool}: {e}")
+            raise AirflowException(f"Error processing pool {pool}: {e}")
     
     if missing_troves:
         missing_details = ', '.join([f"(pool: {p}, id: {i})" for p, i in missing_troves])

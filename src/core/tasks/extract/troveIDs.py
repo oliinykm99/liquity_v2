@@ -1,3 +1,4 @@
+from airflow.exceptions import AirflowException
 from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import troveManager, sortedTrove
 from config import sortedTroves
@@ -22,6 +23,6 @@ def fetch_troveIDs(**kwargs):
                 results[troveManager_address].append(troveID)
         
         except Exception as e:
-            print(f"Error fetching trove IDs for {pool}: {e}")
+            raise AirflowException(f"Error fetching trove IDs for {pool}: {e}")
     
     return results

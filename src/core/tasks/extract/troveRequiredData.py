@@ -1,3 +1,5 @@
+from airflow.exceptions import AirflowException
+
 def extract_requiredTroveData(**kwargs):
     ti = kwargs['ti']
     troveCRs = ti.xcom_pull(task_ids='fetch_troveData_task')
@@ -15,6 +17,6 @@ def extract_requiredTroveData(**kwargs):
                 for trove_id, trove_data in troves.items()
             }
         except Exception as e:
-            print(f"Error extracting required trove data for pool {pool}: {e}")
+            raise AirflowException(f"Error extracting required trove data for pool {pool}: {e}")
 
     return results
