@@ -33,6 +33,23 @@ class DBManager:
         self.cursor.execute(query)
         self.connection.commit()
 
+    def create_trove_table(self):
+        query = """
+        CREATE TABLE IF NOT EXISTS LiquityTroveData (
+            trove_manager TEXT,
+            trove_id TEXT,
+            trove_owner TEXT,
+            trove_coll NUMERIC,
+            trove_cr NUMERIC,
+            trove_debt NUMERIC,
+            trove_rate NUMERIC,
+            timestamp TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY (trove_manager, trove_id, timestamp)
+        );
+        """
+        self.cursor.execute(query)
+        self.connection.commit()
+
     def store_liquity_data(self, data):
         query = """
         INSERT INTO LiquityV2 (active_pool, TVL, TVL_USD, debt, stabilityTVL, price, timestamp)
@@ -51,4 +68,27 @@ class DBManager:
                     values['price']
                 )
             )
+        self.connection.commit()
+
+    def store_trove_data(self, data):
+        query = """
+        INSERT INTO LiquityTroveData (trove_manager, trove_id, trove_owner, trove_coll, trove_cr, trove_debt, trove_rate, timestamp)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+        ON CONFLICT (trove_manager, trove_id, timestamp) DO NOTHING;
+        """
+
+        for trove_manager, troves in data.items():
+            for trove_id, values in troves.items():
+                self.cursor.execute(
+                    query,
+                    (
+                        trove_manager,
+                        trove_id,
+                        values['trove_owner'],
+                        values['trove_coll'],
+                        values['trove_cr'],
+                        values['trove_debt'],
+                        values['trove_rate']
+                    )
+                )
         self.connection.commit()
