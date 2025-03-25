@@ -1,16 +1,23 @@
-from src.core.utils.db_manager import DBManager
 import os
+from airflow.exceptions import AirflowException
+from src.core.utils.db_manager import DBManager
 from dotenv import load_dotenv
 
 load_dotenv()
 db_url = os.getenv("DB")
 
 def load(**kwargs):
-    ti = kwargs['ti']
-    data = ti.xcom_pull(task_ids='aggregate_pools_task')
+    data = kwargs['ti'].xcom_pull(task_ids='aggregate_pools_task')
+    if data is None:
+        raise AirflowException("No data found in XCom from 'aggregate_pools_task'. Ensure the upstream task succeeded.")
 
     db_manager = DBManager(db_url=db_url)
-    db_manager.connect()
-    db_manager.create_table()
-    db_manager.store_liquity_data(data)
-    db_manager.close()
+
+    try:
+        db_manager.connect()
+        db_manager.create_table()
+        db_manager.store_liquity_data(data)
+    except Exception as e:
+        raise AirflowException(f"Database operation failed: {e}")
+    finally:
+        db_manager.close()

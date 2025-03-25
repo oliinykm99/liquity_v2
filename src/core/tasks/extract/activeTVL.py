@@ -1,10 +1,10 @@
+from airflow.exceptions import AirflowException
 from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import activePool
 from config import activePools
 
 def fetch_activeTVL(**kwargs):
-    ti = kwargs['ti']
-    URL = ti.xcom_pull(task_ids='connect_to_ethereum_task')
+    URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
     eth_conn = EthereumConnection(URL=URL)
     w3 = eth_conn.get_connection()
     
@@ -13,7 +13,11 @@ def fetch_activeTVL(**kwargs):
         try:
             pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=activePool)
             value = pool_contract.functions.getCollBalance().call()
+
+            if not isinstance(value, int) or value < 0:
+                raise AirflowException(f"Invalid value received: {value}")
+            
             results[pool] = value
         except Exception as e:
-            print(f"Error fetching TVL for {pool}: {e}")
+            raise AirflowException(f"Error fetching TVL for {pool}: {e}")
     return results
