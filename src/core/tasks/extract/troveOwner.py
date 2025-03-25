@@ -3,9 +3,8 @@ from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import troveManager, troveNFT
 
 def fetch_troveOwner(**kwargs):
-    ti = kwargs['ti']
-    URL = ti.xcom_pull(task_ids='connect_to_ethereum_task')
-    troveIDs = ti.xcom_pull(task_ids='fetch_troveIDs_task') 
+    URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
+    troveIDs = kwargs['ti'].xcom_pull(task_ids='fetch_troveIDs_task') 
     
     eth_conn = EthereumConnection(URL=URL)
     w3 = eth_conn.get_connection()
