@@ -13,7 +13,7 @@ def fetch_troveSizes(**kwargs):
         try:
             pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=sortedTrove)
             value = pool_contract.functions.getSize().call()
-            results[pool] = value
+            results[pool_contract.address] = value
         except Exception as e:
-            raise AirflowException(f"Error fetching trove sizes for {pool}: {e}")
+            raise AirflowException(f"Error fetching trove sizes for {pool_contract.address}: {e}")
     return results

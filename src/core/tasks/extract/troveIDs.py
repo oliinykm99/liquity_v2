@@ -16,12 +16,12 @@ def fetch_troveIDs(**kwargs):
             troveManager_address = pool_contract.functions.troveManager().call()
             troveManager_contract = w3.eth.contract(address=w3.to_checksum_address(troveManager_address), abi=troveManager)
 
-            results[troveManager_address] = []
+            results[troveManager_contract.address] = []
             for i in range(trove_count + 1):
                 troveID = troveManager_contract.functions.getTroveFromTroveIdsArray(i).call()
-                results[troveManager_address].append(troveID)
+                results[troveManager_contract.address].append(troveID)
         
         except Exception as e:
-            raise AirflowException(f"Error fetching trove IDs for {pool}: {e}")
+            raise AirflowException(f"Error fetching trove IDs for {pool_contract.address}: {e}")
     
     return results

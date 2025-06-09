@@ -14,18 +14,18 @@ def fetch_troveData(**kwargs):
     for pool, ids in troveIDs.items():
         try:
             pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=troveManager)
-            results[pool] = {}
+            results[pool_contract.address] = {}
             for id in ids:
                 try:
                     troveData = pool_contract.functions.getLatestTroveData(id).call()
-                    results[pool][id] = troveData
+                    results[pool_contract.address][id] = troveData
                 except Exception as e:
-                    missing_troves.append((pool, id))
-                    raise AirflowException(f"Error fetching data for pool {pool}, trove {id}: {e}")
+                    missing_troves.append((pool_contract.address, id))
+                    raise AirflowException(f"Error fetching data for pool {pool_contract.address}, trove {id}: {e}")
 
         except Exception as e:
-            missing_troves.extend([(pool, id) for id in ids])
-            raise AirflowException(f"Error processing pool {pool}: {e}")
+            missing_troves.extend([(pool_contract.address, id) for id in ids])
+            raise AirflowException(f"Error processing pool {pool_contract.address}: {e}")
     
     if missing_troves:
         missing_details = ', '.join([f"(pool: {p}, id: {i})" for p, i in missing_troves])
