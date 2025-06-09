@@ -1,7 +1,6 @@
 from airflow.exceptions import AirflowException
 from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import troveManager, sortedTrove
-from config import sortedTroves
 
 def fetch_troveIDs(**kwargs):
     URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
