@@ -1,11 +1,9 @@
-from config import activePools
-
 def clean_activeDEBT(**kwargs):
     ti = kwargs['ti']
     activeDebt = ti.xcom_pull(task_ids='fetch_activeDEBT_task')
 
     results = {}
-    for pool in activePools:
+    for pool in activeDebt.keys():
         try:
             results[pool] = activeDebt[pool] / 1e18
         except Exception as e:

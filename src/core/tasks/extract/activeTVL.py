@@ -17,7 +17,7 @@ def fetch_activeTVL(**kwargs):
             if not isinstance(value, int) or value < 0:
                 raise AirflowException(f"Invalid value received: {value}")
             
-            results[pool] = value
+            results[pool_contract.address] = value
         except Exception as e:
-            raise AirflowException(f"Error fetching TVL for {pool}: {e}")
+            raise AirflowException(f"Error fetching TVL for {pool_contract.address}: {e}")
     return results

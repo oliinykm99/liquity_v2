@@ -1,7 +1,3 @@
-from config import activePools
-from config import priceFeeds
-from config import stabilityPools
-
 def aggregate_pools(**kwargs):
     ti = kwargs['ti']
     
@@ -11,11 +7,11 @@ def aggregate_pools(**kwargs):
     clean_activeDebt = ti.xcom_pull(task_ids='clean_activeDEBT_task')
     clean_stabilityTVL = ti.xcom_pull(task_ids='clean_stabilityTVL_task')
 
-    pool_to_stability_pool = dict(zip(activePools, stabilityPools))
-    pool_to_price_feed = dict(zip(activePools, priceFeeds))
+    pool_to_stability_pool = dict(zip(clean_activeTVL.keys(), clean_stabilityTVL.keys()))
+    pool_to_price_feed = dict(zip(clean_activeTVL.keys(), clean_prices.keys()))
 
     results = {}
-    for activePool in activePools:
+    for activePool in clean_activeTVL.keys():
         try:
             stabilityPool = pool_to_stability_pool[activePool]
             priceFeed = pool_to_price_feed[activePool]
