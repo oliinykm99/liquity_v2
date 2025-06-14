@@ -9,6 +9,8 @@ URLS = os.getenv("URLS").split(",") if os.getenv("URLS") else []
 eth_conn = EthereumConnection(URLs=URLS)
 
 def connect_to_ethereum(**kwargs):
+    failed_endpoints = set()
+
     try:
         w3 = eth_conn.get_connection()
         
@@ -23,6 +25,10 @@ def connect_to_ethereum(**kwargs):
         
         kwargs['ti'].xcom_push(key='node_url', value=eth_conn.URLs[eth_conn.current_url_index])
         kwargs['ti'].xcom_push(key='node_url_index', value=eth_conn.current_url_index)
+
+        if failed_endpoints:
+            kwargs['ti'].xcom_push(key='failed_endpoints', value=list(failed_endpoints))
+
         return block_number
 
     except ValueError as e:
