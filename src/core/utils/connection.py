@@ -2,9 +2,9 @@ from web3 import Web3
 from typing import List
 
 class EthereumConnection:
-    def __init__(self, URLs: List[str]):
+    def __init__(self, URLs: List[str], current_url_index: int = 0):
         self.URLs = URLs
-        self.current_url_index = 0
+        self.current_url_index = current_url_index
         self.w3 = None
         self._connect()
 

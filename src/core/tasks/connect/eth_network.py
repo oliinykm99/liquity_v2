@@ -10,7 +10,6 @@ eth_conn = EthereumConnection(URLs=URLS)
 
 def connect_to_ethereum(**kwargs):
     failed_endpoints = set()
-
     try:
         w3 = eth_conn.get_connection()
         
