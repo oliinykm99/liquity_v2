@@ -5,6 +5,8 @@ from config import priceFeeds
 
 def fetch_price(**kwargs):
     URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
+    block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
+
     eth_conn = EthereumConnection(URLs=[URL])
     w3 = eth_conn.get_connection()
 
@@ -12,7 +14,7 @@ def fetch_price(**kwargs):
     for pool in priceFeeds:
         try:
             pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=priceFeed)
-            value = pool_contract.functions.lastGoodPrice().call()
+            value = pool_contract.functions.lastGoodPrice().call(block_identifier=block_number)
 
             if not isinstance(value, int) or value < 0:
                 raise AirflowException(f"Invalid value received: {value}")
