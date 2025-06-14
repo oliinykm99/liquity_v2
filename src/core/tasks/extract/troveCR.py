@@ -7,7 +7,7 @@ def fetch_troveCR(**kwargs):
     troveIDs = kwargs['ti'].xcom_pull(task_ids='fetch_troveIDs_task') 
     prices = kwargs['ti'].xcom_pull(task_ids='fetch_price_task') 
 
-    eth_conn = EthereumConnection(URL=URL)
+    eth_conn = EthereumConnection(URLs=[URL])
     w3 = eth_conn.get_connection()
 
     results = {}
