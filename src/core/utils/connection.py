@@ -18,8 +18,8 @@ class EthereumConnection:
         raise ConnectionError(f'Failed to connect to all Ethereum nodes {self.URLs}')
 
     def get_connection(self):
-        if not self.w3:
-            return False
+        if not self.w3 or not self.w3.is_connected():
+            self.rotate_endpoint()
         return self.w3
     
     def is_connected(self):
