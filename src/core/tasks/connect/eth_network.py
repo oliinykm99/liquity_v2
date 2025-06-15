@@ -13,6 +13,7 @@ def connect_to_ethereum(**kwargs):
 
         block_number = w3.eth.block_number
         
+        kwargs['ti'].xcom_push(key='endpoints', value=eth_conn.URLs)
         kwargs['ti'].xcom_push(key='node_url', value=eth_conn.URLs[eth_conn.current_url_index])
         kwargs['ti'].xcom_push(key='node_url_index', value=eth_conn.current_url_index)
         kwargs['ti'].xcom_push(key='failed_endpoints', value=eth_conn.get_failed_endpoints())
