@@ -4,22 +4,39 @@ from src.core.utils.abi import activePool
 from config import activePools
 
 def fetch_activeTVL(**kwargs):
-    URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
+    endpoints = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='endpoints')
+    working_url_index = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url_index')
     block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
+    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
 
-    eth_conn = EthereumConnection(URLs=[URL])
-    w3 = eth_conn.get_connection()
-    
     results = {}
-    for pool in activePools:
-        try:
-            pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=activePool)
-            value = pool_contract.functions.getCollBalance().call(block_identifier=block_number)
+    remaining_pools = activePools
+    max_retries = len(endpoints)
+    for _ in range(max_retries):
+        try: 
+            w3 = eth_conn.get_connection()
+            failed_pools = []
 
-            if not isinstance(value, int) or value < 0:
-                raise AirflowException(f"Invalid value received: {value}")
+            for pool in remaining_pools:
+                try:
+                    contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=activePool)
+                    value = contract.functions.getCollBalance().call(block_identifier=block_number)
+
+                    if not isinstance(value, int) or value < 0:
+                        raise ValueError(f"Invalid value received: {value}")
+                    
+                    results[contract.address] = value
+                
+                except Exception:
+                    failed_pools.append(pool)
             
-            results[pool_contract.address] = value
+            if not failed_pools:
+                return results
+            
+            remaining_pools = failed_pools
+            eth_conn.rotate_endpoint()
+        
         except Exception as e:
-            raise AirflowException(f"Error fetching TVL for {pool_contract.address}: {e}")
-    return results
+            eth_conn.rotate_endpoint()
+    
+    raise AirflowException("All RPC endpoints failed or exhausted.")
