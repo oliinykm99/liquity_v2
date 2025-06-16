@@ -3,42 +3,45 @@ from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import troveManager, troveNFT
 
 def fetch_troveOwner(**kwargs):
-    URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
+    endpoints = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='endpoints')
+    working_url_index = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url_index')
+    block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
+    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
     troveIDs = kwargs['ti'].xcom_pull(task_ids='fetch_troveIDs_task') 
     
-    eth_conn = EthereumConnection(URLs=[URL])
-    w3 = eth_conn.get_connection()
-
     results = {}
-    missing_troves = []
-    for pool, ids in troveIDs.items():
-        try:
-            pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=troveManager)
-            troveNFT_address = pool_contract.functions.troveNFT().call()
-            troveNFT_contract = w3.eth.contract(address=w3.to_checksum_address(troveNFT_address), abi=troveNFT)
+    remaining_pools = list(troveIDs.keys())
+    max_retries = len(endpoints)
 
-            results[pool_contract.address] = {}
-            for id in ids:
+    for _ in range(max_retries):
+        try:
+            w3 = eth_conn.get_connection()
+            failed_pools = []
+
+            for pool in remaining_pools:
                 try:
-                    troveOwner = troveNFT_contract.functions.ownerOf(id).call()
-                    results[pool_contract.address][id] = troveOwner
-                except Exception as e:
-                    missing_troves.append((pool_contract.address, id))
-                    raise AirflowException(f"Error fetching owner for pool {pool_contract.address}, trove {id}: {e}")
+                    pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=troveManager)
+                    troveNFT_address = pool_contract.functions.troveNFT().call(block_identifier=block_number)
+                    troveNFT_contract = w3.eth.contract(address=w3.to_checksum_address(troveNFT_address), abi=troveNFT)
+
+                    results[pool_contract.address] = {}
+                    for id in troveIDs[pool]:
+                        troveOwner = troveNFT_contract.functions.ownerOf(id).call(block_identifier=block_number)
+                        results[pool_contract.address][id] = troveOwner
+
+                except Exception:
+                    failed_pools.append(pool)
+
+            if not failed_pools:
+                return results
+            
+            remaining_pools = failed_pools
+            eth_conn.rotate_endpoint()
 
         except Exception as e:
-            missing_troves.extend([(pool_contract.address, id) for id in ids])
-            raise AirflowException(f"Error processing pool {pool_contract.address}: {e}")
+            eth_conn.rotate_endpoint()
+
+    raise AirflowException("All RPC endpoints failed or exhausted.")
+                        
+
     
-    if missing_troves:
-        missing_details = ', '.join([f"(pool: {p}, id: {i})" for p, i in missing_troves])
-        raise AirflowException(f"Failed to fetch owners for some troves: {missing_details}")
-    
-    for pool, ids in troveIDs.items():
-        if pool not in results:
-            raise AirflowException(f"Missing results for pool {pool}")
-        for id in ids:
-            if id not in results[pool]:
-                raise AirflowException(f"Missing owner for trove ID {id} in pool {pool}")
-    
-    return results
