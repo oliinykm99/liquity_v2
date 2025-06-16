@@ -6,10 +6,9 @@ def fetch_troveIDs(**kwargs):
     endpoints = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='endpoints')
     working_url_index = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url_index')
     block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
-    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
     sortedTroves = kwargs['ti'].xcom_pull(task_ids='fetch_troveSizes_task') 
-
-
+    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
+    
     results = {}
     remaining_pools = list(sortedTroves.keys())
     max_retries = len(endpoints)

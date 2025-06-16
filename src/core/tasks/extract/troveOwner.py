@@ -6,8 +6,8 @@ def fetch_troveOwner(**kwargs):
     endpoints = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='endpoints')
     working_url_index = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url_index')
     block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
-    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
     troveIDs = kwargs['ti'].xcom_pull(task_ids='fetch_troveIDs_task') 
+    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
     
     results = {}
     remaining_pools = list(troveIDs.keys())
