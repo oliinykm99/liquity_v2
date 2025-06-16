@@ -3,39 +3,46 @@ from src.core.utils.connection import EthereumConnection
 from src.core.utils.abi import troveManager
 
 def fetch_troveCR(**kwargs):
-    URL = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url')
+    endpoints = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='endpoints')
+    working_url_index = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='node_url_index')
+    block_number = kwargs['ti'].xcom_pull(task_ids='connect_to_ethereum_task', key='return_value')
     troveIDs = kwargs['ti'].xcom_pull(task_ids='fetch_troveIDs_task') 
     prices = kwargs['ti'].xcom_pull(task_ids='fetch_price_task') 
-
-    eth_conn = EthereumConnection(URLs=[URL])
-    w3 = eth_conn.get_connection()
+    eth_conn = EthereumConnection(URLs=endpoints, current_url_index=working_url_index)
 
     results = {}
-    missing_troves = []
-
-    for index, pool in enumerate(troveIDs.keys()):
+    remaining_pools = list(troveIDs.keys())
+    max_retries = len(endpoints)
+    for _ in range(max_retries):
         try:
-            pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=troveManager)
-            price_feed_address = list(prices.keys())[index]  
-            if price_feed_address not in prices:
-                raise AirflowException(f"Missing price for price feed {price_feed_address}")
+            w3 = eth_conn.get_connection()
+            failed_pools = []
 
-            price = prices[price_feed_address]
-            results[pool_contract.address] = {}
-            for id in troveIDs[pool_contract.address]:
+            for pool in remaining_pools:
                 try:
-                    troveICR = pool_contract.functions.getCurrentICR(id, price).call()
-                    results[pool_contract.address][id] = troveICR
-                except Exception as e:
-                    missing_troves.append((pool_contract.address, id))
-                    raise AirflowException(f"Error fetching ICR for pool {pool_contract.address}, trove {id}: {e}")
+                    pool_contract = w3.eth.contract(address=w3.to_checksum_address(pool), abi=troveManager)
+                    price_feed_address = list(prices.keys())[list(troveIDs.keys()).index(pool)]
 
+                    if price_feed_address not in prices:
+                        raise AirflowException(f"Missing price for price feed {price_feed_address}")
+                    
+                    price = prices[price_feed_address]
+                    results[pool_contract.address] = {}
+
+                    for id in troveIDs[pool]:
+                        troveICR = pool_contract.functions.getCurrentICR(id, price).call(block_identifier=block_number)
+                        results[pool_contract.address][id] = troveICR
+
+                except Exception:
+                    failed_pools.append(pool)
+
+            if not failed_pools:
+                return results
+            
+            remaining_pools = failed_pools
+            eth_conn.rotate_endpoint()
+        
         except Exception as e:
-            missing_troves.extend([(pool_contract.address, id) for id in troveIDs.get(pool_contract.address, [])])
-            raise AirflowException(f"Error processing pool {pool_contract.address}: {e}")
-
-    if missing_troves:
-        missing_details = ', '.join([f"(pool: {p}, id: {i})" for p, i in missing_troves])
-        raise AirflowException(f"Failed to fetch ICRs for some troves: {missing_details}")
-
-    return results
+            eth_conn.rotate_endpoint()
+    
+    raise AirflowException("All RPC endpoints failed or exhausted.")
