@@ -11,7 +11,6 @@ def fetch_troveIDs(**kwargs):
 
 
     results = {}
-    results = {}
     remaining_pools = list(sortedTroves.keys())
     max_retries = len(endpoints)
     for _ in range(max_retries):
