@@ -37,6 +37,7 @@ def fetch_troveCR(**kwargs):
                     failed_pools.append(pool)
 
             if not failed_pools:
+                kwargs['ti'].xcom_push(key='failed_endpoints', value=eth_conn.get_failed_endpoints())
                 return results
             
             remaining_pools = failed_pools
