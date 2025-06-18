@@ -35,10 +35,6 @@ Below is a screenshot showing the trove_manager and number of troves, which you 
 
 ## Future Work
 
-We plan to extend the pipeline with the following enhancements:
-- **Data Validation and Quality:**
-  - Introduce validation checks to ensure data integrity.
-  - Implement data quality monitoring for both DAGs.
-- **Optimization:**
-  - Improve the performance of existing DAGs by optimizing queries and task execution.
-  - Refactor code for better scalability and maintainability.
+Future improvements and enhancements are now tracked in the [Issues](https://github.com/oliinykm99/liquity_v2/issues) tab of this repository.
+
+Please check the open issues for planned features, bug fixes, and contributions in progress.
