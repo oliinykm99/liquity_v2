@@ -4,25 +4,21 @@ from airflow.exceptions import AirflowException
 from src.core.utils.connection import EthereumConnection
 
 load_dotenv()
-URL = os.getenv("URL")
-
-eth_conn = EthereumConnection(URL=URL)
-w3 = eth_conn.get_connection()
+URLS = os.getenv("URLS").split(",") if os.getenv("URLS") else []
 
 def connect_to_ethereum(**kwargs):
     try:
-        if not w3:
-            raise AirflowException('Web3 instance is not initialized.')
-        
-        if not w3.is_connected():
-            raise AirflowException('Failed to connect to Ethereum network.')
-        
+        eth_conn = EthereumConnection(URLs=URLS)
+        w3 = eth_conn.get_connection()
+
         block_number = w3.eth.block_number
-        if not isinstance(block_number, int) or block_number < 0:
-            raise AirflowException(f"Invalid block number received: {block_number}")
         
-        kwargs['ti'].xcom_push(key='node_url', value=URL)
+        kwargs['ti'].xcom_push(key='endpoints', value=eth_conn.URLs)
+        kwargs['ti'].xcom_push(key='node_url', value=eth_conn.URLs[eth_conn.current_url_index])
+        kwargs['ti'].xcom_push(key='node_url_index', value=eth_conn.current_url_index)
+        kwargs['ti'].xcom_push(key='failed_endpoints', value=eth_conn.get_failed_endpoints())
+
         return block_number
 
     except Exception as e:
-        raise AirflowException(f"Error: {e}")
+        raise AirflowException(f"Failed to connect to Ethereum RPC. Error: {str(e)}")
